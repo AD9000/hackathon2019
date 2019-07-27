@@ -3,9 +3,35 @@ import { Coord } from "../types";
 
 const URL = "http://localhost:5000";
 
-export interface IBusStopData {}
+export const busStopExists = (
+  x: BusTimesData | undefined
+): x is IBusTimesData => {
+  return Boolean(x && (x as IBusTimesData).stop);
+};
 
-export interface IBusData {}
+export interface IBusStopData {
+  coord: Coord;
+  id: string;
+  name: string;
+}
+
+export interface IBusData {
+  departureTimeEstimated?: string;
+  departureTimePlanned: string;
+  properties: {
+    AVMSTripID: string;
+    PlanLowFloorVehicle: "1";
+    PlanWheelChairAccess: "1";
+    WheelchairAccess: "true" | "false";
+  };
+  transportation: {
+    description: string;
+    number: string;
+    destination: {
+      name: string;
+    };
+  };
+}
 
 export interface IBusTimesData {
   stop: IBusStopData;

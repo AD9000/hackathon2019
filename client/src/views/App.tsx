@@ -1,12 +1,13 @@
-import React, { useState } from "react";
-import { Map, TileLayer, CircleMarker } from "react-leaflet";
+import React, { useState, useEffect } from "react";
+import { Map, TileLayer, CircleMarker, Marker, Popup } from "react-leaflet";
 import { Dimmer, Button, Header, Icon, Segment } from "semantic-ui-react";
+import { distanceInWordsToNow } from "date-fns";
 
 import { useGeolocation } from "../useGeolocation";
 import { useRefHeight } from "../useRefHeight";
 import { useDefaultValue } from "../useDefaultValue";
 import { getCoord } from "../types";
-import { getBusTimes, BusTimesData } from "../api/api";
+import { getBusTimes, BusTimesData, busStopExists } from "../api/api";
 import { useInterval } from "../useInterval";
 
 const App: React.FC = () => {
@@ -19,15 +20,22 @@ const App: React.FC = () => {
   const defaultCoords = defaultPos ? getCoord(defaultPos) : undefined;
   const coords = position ? getCoord(position) : undefined;
 
-  const getBusData = async () => {
+  useEffect(() => {
+    const call = async () => {
+      if (defaultPos) {
+        const busTimes = await getBusTimes(getCoord(defaultPos));
+        setBusData(busTimes);
+      }
+    };
+
+    call();
+  }, [defaultPos]);
+
+  useInterval(async () => {
     if (coords) {
       const busTimes = await getBusTimes(coords);
       setBusData(busTimes);
     }
-  };
-
-  useInterval(() => {
-    getBusData();
   }, 60000);
 
   return (
@@ -41,6 +49,11 @@ const App: React.FC = () => {
             />
             {coords && (
               <CircleMarker center={coords} fillColor="blue" radius={10} />
+            )}
+            {busStopExists(busData) && (
+              <Marker position={busData.stop.coord}>
+                <Popup>{busData.stop.name}</Popup>
+              </Marker>
             )}
           </Map>
           <Dimmer active={!position}>
@@ -62,15 +75,22 @@ const App: React.FC = () => {
       </div>
       <div className="list">
         <Segment color="blue" attached>
-          <Header as="h3">UNSW Gate 14, Barker St</Header>
+          <Header as="h3">
+            {busStopExists(busData) ? busData.stop.name : "No nearby bus stops"}
+          </Header>
         </Segment>
         <div className="scroll-list">
-          <Segment attached>This segment is on top</Segment>
-          <Segment attached>This segment is attached on both sides</Segment>
-          <Segment attached>This segment is on bottom</Segment>
-          <Segment attached>This segment is on top</Segment>
-          <Segment attached>This segment is attached on both sides</Segment>
-          <Segment attached>This segment is on bottom</Segment>
+          {busStopExists(busData) &&
+            busData.buses.map((bus, i) => (
+              <Segment attached key={i}>
+                {bus.transportation.number}{" "}
+                {bus.transportation.destination.name}{" "}
+                {distanceInWordsToNow(
+                  bus.departureTimeEstimated || bus.departureTimePlanned
+                )}
+                {/* <Button>Flag</Button> */}
+              </Segment>
+            ))}
         </div>
       </div>
     </div>
