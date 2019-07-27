@@ -1,24 +1,30 @@
 import { safeFetch } from "../safeFetch";
 import { Coord } from "../types";
 
-const URL = "";
+const URL = "http://localhost:5000";
 
-interface IBusData {}
+export interface IBusStopData {}
 
-interface IBusStopData {
-  name: string;
+export interface IBusData {}
+
+export interface IBusTimesData {
+  stop: IBusStopData;
   buses: IBusData[];
 }
 
+export type BusTimesData = IBusTimesData | {};
+
 export const getBusTimes = async (
   coord: Coord
-): Promise<IBusStopData | undefined> => {
-  const result = await safeFetch<IBusStopData>(
+): Promise<BusTimesData | undefined> => {
+  const result = await safeFetch<BusTimesData>(
     `${URL}/?lat=${coord[0]}&long=${coord[1]}`
   );
 
+  console.log(result);
   if (result instanceof Error) {
-    return undefined;
+    console.log("error!");
+    return {};
   }
 
   return result;

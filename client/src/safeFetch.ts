@@ -3,7 +3,7 @@ export const safeFetch = async <TResponse extends any>(
 ): Promise<TResponse | Error> => {
   try {
     const response = await fetch(url);
-    if (response.ok) {
+    if (!response.ok) {
       throw new Error(`${response.status} ${response.statusText}`);
     }
 

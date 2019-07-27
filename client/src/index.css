@@ -20,7 +20,7 @@ code {
   height: 100%;
   display: grid;
   grid-template-rows: auto;
-  grid-template-columns: auto 200px;
+  grid-template-columns: auto 340px;
   grid-template-areas: "map list";
 }
 

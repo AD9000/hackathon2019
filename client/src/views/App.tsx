@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Map, TileLayer, CircleMarker } from "react-leaflet";
 import { Dimmer, Button, Header, Icon, Segment } from "semantic-ui-react";
 
@@ -6,14 +6,29 @@ import { useGeolocation } from "../useGeolocation";
 import { useRefHeight } from "../useRefHeight";
 import { useDefaultValue } from "../useDefaultValue";
 import { getCoord } from "../types";
+import { getBusTimes, BusTimesData } from "../api/api";
+import { useInterval } from "../useInterval";
 
 const App: React.FC = () => {
   const { position, error, requestLocationData } = useGeolocation();
   const { height, ref } = useRefHeight<HTMLDivElement>();
   const defaultPos = useDefaultValue(position);
 
+  const [busData, setBusData] = useState<BusTimesData>();
+
   const defaultCoords = defaultPos ? getCoord(defaultPos) : undefined;
   const coords = position ? getCoord(position) : undefined;
+
+  const getBusData = async () => {
+    if (coords) {
+      const busTimes = await getBusTimes(coords);
+      setBusData(busTimes);
+    }
+  };
+
+  useInterval(() => {
+    getBusData();
+  }, 60000);
 
   return (
     <div className="grid">
