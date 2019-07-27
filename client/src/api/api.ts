@@ -1,5 +1,5 @@
 import { safeFetch } from "../safeFetch";
-import { Coord } from "../views/App";
+import { Coord } from "../types";
 
 const URL = "";
 

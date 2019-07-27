@@ -41,4 +41,13 @@ code {
 
 .list {
   grid-area: list;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.scroll-list {
+  overflow: scroll;
+  overflow-x: hidden;
+  height: 100%;
 }
