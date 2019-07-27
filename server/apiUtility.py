@@ -1,5 +1,6 @@
 import requests
 import os
+from google.transit import gtfs_realtime_pb2
 
 api_key = ""
 with open(os.path.abspath(os.path.join(os.path.dirname(__file__), 'apiKey')), "r") as keyFile:
@@ -11,6 +12,24 @@ if api_key == "":
 headers={
     "Authorization": "apikey " + api_key
 }
+
+def JSONIFY_gtfs(gtfs):
+    out = ""
+    for line in str(gtfs).split("\n"):
+        pass
+        
+
+def get_vehicle_position(AVMS_id):
+    feed = gtfs_realtime_pb2.FeedMessage()
+    r = requests.get("https://api.transport.nsw.gov.au/v1/gtfs/vehiclepos/buses",
+        headers=headers
+    )
+    feed.ParseFromString(r.content)
+    for entity in feed.entity:
+        if AVMS_id == entity.vehicle.trip.trip_id:
+            return entity
+    return ""
+            
 
 def get_depart_from_stop(stop_id):
     r = requests.get('https://api.transport.nsw.gov.au/v1/tp/departure_mon',
@@ -65,3 +84,4 @@ if __name__ == "__main__":
     # Test data 
     stop = get_stop_by_location("151.230787:-33.918316")
     departures = get_depart_from_stop(stop["id"])
+    print(dir(get_vehicle_position("955736")))
