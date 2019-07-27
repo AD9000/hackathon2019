@@ -18,6 +18,9 @@ export interface IBusStopData {
 export interface IBusData {
   departureTimeEstimated?: string;
   departureTimePlanned: string;
+  location: {
+    name: string;
+  };
   properties: {
     AVMSTripID: string;
     PlanLowFloorVehicle: "1";
