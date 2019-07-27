@@ -1,1 +1,2 @@
-# hackathon2019
+# See Sharpp
+Bus flagging system for sydney buses.
