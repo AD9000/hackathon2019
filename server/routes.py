@@ -20,11 +20,11 @@ class User(Resource):
                     buses = apiUtility.get_depart_from_stop(stop["id"])
 
                     # returns all the buses from the closest stop. utc time tho...
-                    return buses
+                    return { 'stop': stop, 'buses': buses }, 200
             except:
-                return "no value for lat or long or invalid value"
+                return "no value for lat or long or invalid value", 400
         else:
-            return "no arguments!"
+            return "no arguments!", 400
         # if (request.args is {} or request.args['lat'] is None or request.args['long'] is None):
         #     return 'invalid input!'
         
