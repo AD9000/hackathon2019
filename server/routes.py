@@ -22,7 +22,7 @@ class User(Resource):
                     # returns all the buses from the closest stop. utc time tho...
                     return { 'stop': stop, 'buses': buses }, 200
             except:
-                return "no value for lat or long or invalid value", 400
+                return "no bus stop found", 400
         else:
             return "no arguments!", 400
         # if (request.args is {} or request.args['lat'] is None or request.args['long'] is None):
