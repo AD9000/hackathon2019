@@ -1,4 +1,4 @@
-import { safeFetch } from "../safeFetch";
+import { safeFetch, safePost } from "../safeFetch";
 import { Coord } from "../types";
 
 const URL = "http://localhost:5000";
@@ -30,6 +30,9 @@ export interface IBusData {
     destination: {
       name: string;
     };
+    properties: {
+      tripCode: number;
+    };
   };
 }
 
@@ -49,9 +52,22 @@ export const getBusTimes = async (
 
   console.log(result);
   if (result instanceof Error) {
-    console.log("error!");
     return {};
   }
 
   return result;
+};
+
+export const flagBus = async (
+  busNumber: string,
+  tripCode: number,
+  stopId: string,
+  flag: boolean
+) => {
+  await safePost(URL, undefined, {
+    busNumber,
+    tripCode,
+    stopId,
+    flag
+  });
 };

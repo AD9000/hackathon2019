@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { Map, TileLayer, CircleMarker, Marker, Popup } from "react-leaflet";
 import { Dimmer, Button, Header, Icon, Segment } from "semantic-ui-react";
-import { distanceInWordsToNow } from "date-fns";
+import { distanceInWordsToNow, addMinutes, isAfter } from "date-fns";
 
 import { useGeolocation } from "../useGeolocation";
 import { useRefHeight } from "../useRefHeight";
 import { useDefaultValue } from "../useDefaultValue";
 import { getCoord } from "../types";
-import { getBusTimes, BusTimesData, busStopExists } from "../api/api";
+import {
+  getBusTimes,
+  BusTimesData,
+  busStopExists,
+  flagBus,
+  IBusData,
+  IBusStopData
+} from "../api/api";
 import { useInterval } from "../useInterval";
 
 const App: React.FC = () => {
@@ -38,6 +45,17 @@ const App: React.FC = () => {
     }
   }, 60000);
 
+  const handleFlagBus = (stop: IBusStopData, bus: IBusData) => {
+    const {
+      transportation: {
+        number,
+        properties: { tripCode }
+      }
+    } = bus;
+    const { id } = stop;
+    flagBus(number, tripCode, id, true);
+  };
+
   return (
     <div className="grid">
       <div className="map" ref={ref}>
@@ -48,7 +66,7 @@ const App: React.FC = () => {
               attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             />
             {coords && (
-              <CircleMarker center={coords} fillColor="blue" radius={10} />
+              <CircleMarker center={coords} fillColor="purple" radius={10} />
             )}
             {busStopExists(busData) && (
               <Marker position={busData.stop.coord}>
@@ -74,23 +92,34 @@ const App: React.FC = () => {
         </Dimmer.Dimmable>
       </div>
       <div className="list">
-        <Segment color="blue" attached>
+        <Segment color="violet" attached>
           <Header as="h3">
             {busStopExists(busData) ? busData.stop.name : "No nearby bus stops"}
           </Header>
         </Segment>
         <div className="scroll-list">
           {busStopExists(busData) &&
-            busData.buses.map((bus, i) => (
-              <Segment attached key={i}>
-                {bus.transportation.number}{" "}
-                {bus.transportation.destination.name}{" "}
-                {distanceInWordsToNow(
-                  bus.departureTimeEstimated || bus.departureTimePlanned
-                )}
-                {/* <Button>Flag</Button> */}
-              </Segment>
-            ))}
+            busData.buses.map((bus, i) => {
+              const busTime =
+                bus.departureTimeEstimated || bus.departureTimePlanned;
+              return (
+                <Segment attached key={i}>
+                  {bus.transportation.number}{" "}
+                  {bus.transportation.destination.name}{" "}
+                  {distanceInWordsToNow(busTime)}
+                  <Button
+                    floated="right"
+                    circular
+                    icon="hand paper outline"
+                    color="violet"
+                    inverted
+                    style={{ marginTop: -8 }}
+                    onClick={handleFlagBus.bind(undefined, busData.stop, bus)}
+                    disabled={isAfter(busTime, addMinutes(Date.now(), 15))}
+                  />
+                </Segment>
+              );
+            })}
         </div>
       </div>
     </div>
