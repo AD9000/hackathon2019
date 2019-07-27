@@ -1,5 +1,6 @@
 import requests
 import os
+import datetime
 
 api_key = ""
 with open(os.path.abspath(os.path.join(os.path.dirname(__file__), 'apiKey')), "r") as keyFile:
@@ -28,6 +29,8 @@ def get_depart_from_stop(stop_id):
         "exclMOT_7": "1", # Coach
         "exclMOT_9": "1", # Ferry
         "TfNSWDM": "true",
+        "itdDate": datetime.date.today().strftime('%Y%m%d'),
+        "itdTime": datetime.datetime.now().strftime('%H%M'),
         "version": "10.2.1.42"
     })
     
@@ -37,13 +40,12 @@ def get_depart_from_stop(stop_id):
 string coord:
     format: LONGITUDE:LATITUDE
 '''
-def get_stop_by_location(coord):
-    coord += ":EPSG:4326"
+def get_stop_by_location(latitude, longditude):
     r = requests.get('https://api.transport.nsw.gov.au/v1/tp/coord',
         headers=headers,
         params={
         "outputFormat": "rapidJSON",
-        "coord": coord,
+        "coord": longditude + ':' + latitude + ":EPSG:4326",
         "coordOutputFormat": "EPSG:4326",
         "inclFilter": 1,    
         "type_1": "BUS_POINT",  
