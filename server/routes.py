@@ -20,21 +20,40 @@ class User(Resource):
     #     isFlagged = {}
 
     def get(self):
-        if request.args != {}:
+        if ('auth' in request.args):
+            # driver view!
             try:
-                if (request.args['lat'] and request.args['long']):
-                    # get the closest bus stop...
-                    stop = apiUtility.get_stop_by_location(request.args['lat'], request.args['long'])
+                busId = (int(request.args['busNumber']), int(request.args['tripCode'])) 
+                busId = str(busId)
 
-                    # get the list of buses...
-                    buses = apiUtility.get_depart_from_stop(stop["id"])
+                isFlagged = {}
+                if os.path.exists('tempfile') and os.path.getsize('tempfile') > 0:
+                    # load data from file
+                    isFlagged = self.load('tempfile')
 
-                    # returns all the buses from the closest stop. utc time tho...
-                    return { 'stop': stop, 'buses': buses }, 200
+                if (busId in isFlagged):
+                    # return all the stops.
+                    return isFlagged[busId], 200
+                else:
+                    return 'no stops', 400
             except:
-                return "no bus stop found", 400
+                return 'error while parsing request', 400
         else:
-            return "no arguments!", 400        
+            if request.args != {}:
+                try:
+                    if (request.args['lat'] and request.args['long']):
+                        # get the closest bus stop...
+                        stop = apiUtility.get_stop_by_location(request.args['lat'], request.args['long'])
+
+                        # get the list of buses...
+                        buses = apiUtility.get_depart_from_stop(stop["id"])
+
+                        # returns all the buses from the closest stop. utc time tho...
+                        return { 'stop': stop, 'buses': buses }, 200
+                except:
+                    return "no bus stop found", 400
+            else:
+                return "no arguments!", 400        
 
     def post(self):
         #path = './tempfile'
@@ -64,21 +83,20 @@ class User(Resource):
                 # for each stop the bus is flagged at...
                 for stop in isFlagged[busId]:
                     innerkeys = stop.keys()
-                    # print ("so stop id in keys!!\n\n\n\n\n\n\n")
                     #return innerkeys
                     if (stopId in innerkeys):
                         if (flag):
                             stop[stopId] += 1
                         else:
                             if (stop[stopId] == 0):
-                                print ('unexpected unflag when flag = 0')
+                                return 'unexpected unflag when flag = 0', 400
                             else:
                                 stop[stopId] -= 1
                     else:
                         if (flag):
                             stop[stopId] = 1
                         else:
-                            print ('unexpected unflag when flag does not exist', 400)
+                            return 'unexpected unflag when flag does not exist', 400
             else:
                 if (flag):
                     isFlagged[busId] = [{ stopId: 1 }]
@@ -93,7 +111,6 @@ class User(Resource):
     # saves the flagged dict.
     def save(self, flagged, file):
         try:
-            print ('saving...' + str(file))
             f = open(file, 'w')
             f.write(json.dumps(flagged))
             f.close()
