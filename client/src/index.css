@@ -11,3 +11,43 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+
+#root {
+  height: 100%;
+}
+
+.grid {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto;
+  grid-template-columns: auto 200px;
+  grid-template-areas: "map list";
+}
+
+@media only screen and (max-width: 600px) {
+  .grid {
+    grid-template-columns: auto;
+    grid-template-rows: 400px auto;
+    grid-template-areas:
+      "map"
+      "list";
+  }
+}
+
+.map {
+  grid-area: map;
+  height: 100%;
+}
+
+.list {
+  grid-area: list;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.scroll-list {
+  overflow: scroll;
+  overflow-x: hidden;
+  height: 100%;
+}
