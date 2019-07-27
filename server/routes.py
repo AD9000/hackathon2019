@@ -5,18 +5,29 @@ import apiUtility
 import datetime
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret!'
 api = Api(app)
 
 class User(Resource):
     def get(self):
-        # get the closest bus stop...
-        stop = apiUtility.get_stop_by_location(request.args['lat'], request.args['long'])
+        if request.args != {}:
+            try:
+                if (request.args['lat'] and request.args['long']):
+                    # get the closest bus stop...
+                    stop = apiUtility.get_stop_by_location(request.args['lat'], request.args['long'])
 
-        # get the list of buses...
-        buses = apiUtility.get_depart_from_stop(stop["id"])
+                    # get the list of buses...
+                    buses = apiUtility.get_depart_from_stop(stop["id"])
 
-        # returns all the buses from the closest stop. utc time tho...
-        return buses
+                    # returns all the buses from the closest stop. utc time tho...
+                    return buses
+            except:
+                return "no value for lat or long or invalid value"
+        else:
+            return "no arguments!"
+        # if (request.args is {} or request.args['lat'] is None or request.args['long'] is None):
+        #     return 'invalid input!'
+        
 
     def post(self):
         return request.args
